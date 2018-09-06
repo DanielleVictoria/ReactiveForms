@@ -1,0 +1,26 @@
+<div>
+    <div>
+        <!-- tab index is required make the events running. To allow us to focus on the div -->
+        <div 
+            tabindex='0'
+            (keydown)='onKeyDown($event)'
+            (blur)='onBlur($event)'
+            (focus)='onFocus($event)'>
+            <p>{{ value }}</p>
+            <div>
+                <button 
+                    type='button' 
+                    (click)='increment()'
+                    [disabled]='value===max'>
+                    +
+                </button>
+                <button 
+                    type='button' 
+                    (click)='decrement()'
+                    [disabled]='value===min'>
+                    -
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
