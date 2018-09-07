@@ -10,6 +10,7 @@
             </option>
         </select>
         
+        <!-- Control Value Accessor -->
         <stock-counter
             [step]='10'
             [min]='10'
@@ -19,9 +20,13 @@
 
         <button
             (click)='onAdd()' 
-            type='button'>
+            type='button'
+            [disabled]='stockExists || notSelected'>
             Add stock
         </button>
+        <div *ngIf='stockExists'>
+            Item already exixts in the stock
+        </div>
 
     </div>
 </div>

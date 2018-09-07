@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { Item } from '../models/item.interface';
@@ -21,6 +21,13 @@ export class StockInventoryService {
     getProducts(): Observable<Product[]> {
         return this.httpClient.get<Product[]>(`${STOCKINVENTORY_API}/products`).pipe(
             // /map((response: Response) => response.json()),
+            catchError((error: any) => Observable.throw(error))
+        );
+    }
+
+    checkBranchId(id: string): Observable<boolean> {
+        return this.httpClient.get(`${STOCKINVENTORY_API}/branches`, { params : new HttpParams().set('id',id) }).pipe(
+            map((response : any[]) => !!response.length),
             catchError((error: any) => Observable.throw(error))
         );
     }

@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators, AbstractControl } from '@angular/forms';
 import { Product } from '../models/product.interface';
 import { StockInventoryService } from '../services/stock-inventory.service';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Observable } from 'rxjs';
 import { Item } from '../models/item.interface';
-
+import { StockValidators } from './stock-inventory.validators';
+import { map } from 'rxjs/operators';
 
 @Component({
     selector: 'stock-inventory',
@@ -17,14 +18,20 @@ export class StockInventoryComponent implements OnInit {
     total: number;
     productMap: Map<number, Product>;
 
-    form = this.fb.group({
-        store: this.fb.group({
-            branch: ['', Validators.required],
-            code: ['', Validators.required]
-        }),
-        selector: this.createStock({}),
-        stock: this.fb.array([])
-    })
+    form = this.fb.group(
+        {
+            store: this.fb.group({
+                // first argument is the default value, second argument is for the sync validators and 
+                //third is for async validators
+                branch: ['', [Validators.required, StockValidators.checkBranch], [this.validateBranch.bind(this)]],
+                code: ['', Validators.required]
+            }),
+            selector: this.createStock({}),
+            stock: this.fb.array([])
+        }, {
+            // form group custom validators
+            validator: StockValidators.checkStockExists
+        })
 
     constructor(
         private fb: FormBuilder,
@@ -55,6 +62,14 @@ export class StockInventoryComponent implements OnInit {
                 return this.calculateTotal(value)
             });
         });
+    }
+
+    validateBranch(control : AbstractControl) {
+        return this.stockService.checkBranchId(control.value).pipe(
+            map((response : boolean) => {
+                return response ? null : {unknownBranch : true}
+            })
+        );
     }
 
     calculateTotal(value: Item[]) {
